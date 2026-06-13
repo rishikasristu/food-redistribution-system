@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Donations</title>
+</head>
+<body>
+
+<h2>My Donation History</h2>
+
+<table border="1">
+
+<tr>
+    <th>Food</th>
+    <th>Category</th>
+    <th>Status</th>
+</tr>
+
+{% for donation in donations %}
+
+<tr>
+
+    <td>{{ donation.food_name }}</td>
+
+    <td>{{ donation.food_type }}</td>
+
+    <td>{{ donation.status }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nearest Organizations</title>
+</head>
+<body>
+
+<h2>Nearest Organizations</h2>
+
+<table border="1">
+
+<tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Distance (km)</th>
+    <th>Phone</th>
+    <th>Maps</th>
+</tr>
+
+{% for org in top5 %}
+
+<tr>
+    <td>{{ org.name }}</td>
+    <td>{{ org.type }}</td>
+    <td>{{ org.distance }}</td>
+    <td>{{ org.phone }}</td>
+
+    <td>
+        <a href="{{ org.maps }}" target="_blank">
+            Open Maps
+        </a>
+    </td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>

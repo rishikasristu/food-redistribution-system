@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+```
+<title>Food Donation Form</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+```
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-5">
+
+```
+<div class="card shadow p-4">
+
+    <h2 class="text-center text-success mb-4">
+        🍱 Food Donation Form
+    </h2>
+
+    <form action="/submit" method="POST" enctype="multipart/form-data">
+
+        <div class="mb-3">
+            <label class="form-label">Food Name</label>
+            <input type="text"
+                    id="food_name"
+                    name="food_name"
+                    class="form-control"
+                    required>
+        </div>
+        <div class="mb-3">
+
+            <label class="form-label">
+                Food Category
+            </label>
+
+            <select
+                name="food_type"
+                class="form-control"
+                required>
+
+                <option value="">
+                    Select Category
+                </option>
+
+                <option value="Cooked Food">
+                    Cooked Food
+                </option>
+
+                <option value="Packaged Food">
+                    Packaged Food
+                </option>
+
+                <option value="Bakery Items">
+                    Bakery Items
+                </option>
+
+                <option value="Fruits & Vegetables">
+                    Fruits & Vegetables
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Food Description / Ingredients
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                class="form-control"
+                rows="4"
+                placeholder="Describe food or ingredients used">
+            </textarea>
+
+            <br>
+
+            <button type="button"
+                    onclick="startEnglishVoice()"
+                    class="btn btn-primary">
+
+                🎤 English Voice
+
+            </button>
+
+            <button type="button"
+                    onclick="startTeluguVoice()"
+                    class="btn btn-warning">
+
+                🎤 Telugu Voice
+
+            </button>
+
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Quantity (in grams)</label>
+
+            <input type="text"
+                    id="quantity"
+                   name="quantity"
+                   class="form-control"
+                   placeholder="Example: 200"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Preparation Time</label>
+
+            <input type="datetime-local"
+                    id="prep_time"
+                   name="prep_time"
+                   class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Expiry Time</label>
+
+            <input type="datetime-local"
+                    id = "expiry_time"
+                   name="expiry_time"
+                   class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Phone Number</label>
+
+            <input type="tel"
+                    id = "phone"
+                   name="phone"
+                   class="form-control"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Food Image</label>
+
+            <input type="file"
+                   name="image"
+                   class="form-control">
+        </div>
+
+        <input type="hidden"
+               id="latitude"
+               name="latitude">
+
+        <input type="hidden"
+               id="longitude"
+               name="longitude">
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Detected Address
+            </label>
+
+           <input
+                type="text"
+                id="address"
+                name="address"
+                class="form-control"
+                onchange="updateMapFromAddress()">
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Location Preview
+            </label>
+            <button
+                type="button"
+                class="btn btn-primary mt-2"
+                onclick="openGoogleMaps()">
+
+                Adjust Location on Map
+
+            </button>
+
+            <iframe
+                id="mapFrame"
+                width="100%"
+                height="300"
+                style="border:0;">
+            </iframe>
+
+        </div>
+        <button type="button"
+        class="btn btn-warning mb-3"
+        onclick="showPreview()">
+
+        Preview Donation
+
+        </button>
+
+        <div id="previewBox"
+        class="card mt-4 p-3"
+        style="display:none;">
+
+        <h4>Review Donation</h4>
+
+        <p><b>Food Name:</b> <span id="pFood"></span></p>
+
+        <p><b>Description:</b> <span id="pDesc"></span></p>
+
+        <p><b>Quantity:</b> <span id="pQty"></span></p>
+
+        <p><b>Preparation Time:</b> <span id="pPrep"></span></p>
+
+        <p><b>Expiry Time:</b> <span id="pExpiry"></span></p>
+
+        <p><b>Phone:</b> <span id="pPhone"></span></p>
+
+    </div>
+
+    <button type="submit"
+            id="submitBtn"
+            class="btn btn-success w-100"
+            style="display:none;">
+
+        Confirm & Submit Donation
+
+    </button>
+    </form>
+
+</div>
+```
+
+</div>
+
+<script>
+
+// English Voice Recognition
+
+function startEnglishVoice(){
+
+    var recognition = new webkitSpeechRecognition();
+
+    recognition.lang = "en-IN";
+
+    recognition.start();
+
+    recognition.onresult = function(event){
+
+        document.getElementById("description").value =
+        event.results[0][0].transcript;
+
+    };
+
+}
+
+// Telugu Voice Recognition
+
+function startTeluguVoice(){
+
+    var recognition = new webkitSpeechRecognition();
+
+    recognition.lang = "te-IN";
+
+    recognition.start();
+
+    recognition.onresult = function(event){
+
+        document.getElementById("description").value =
+        event.results[0][0].transcript;
+
+    };
+
+}
+
+// GPS + Address + Map Preview
+
+navigator.geolocation.getCurrentPosition(async function(position){
+
+    let lat = position.coords.latitude;
+    let lon = position.coords.longitude;
+
+    document.getElementById("latitude").value = lat;
+    document.getElementById("longitude").value = lon;
+
+    try {
+
+        let response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+        );
+
+        let data = await response.json();
+
+        let addr = data.address;
+
+        document.getElementById("address").value =
+        (addr.suburb || "") + ", " +
+        (addr.city || addr.town || addr.village || "") + ", " +
+        (addr.state || "");
+
+    }
+    catch(error){
+
+        document.getElementById("address").value =
+            "Address not available";
+
+    }
+
+    document.getElementById("mapFrame").src =
+        `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+
+});
+
+function showPreview(){
+
+    document.getElementById("previewBox").style.display =
+        "block";
+
+    document.getElementById("submitBtn").style.display =
+        "block";
+
+    document.getElementById("pFood").innerText =
+        document.getElementById("food_name").value;
+
+    document.getElementById("pDesc").innerText =
+        document.getElementById("description").value;
+
+    document.getElementById("pQty").innerText =
+        document.getElementById("quantity").value;
+
+    document.getElementById("pPrep").innerText =
+        document.getElementById("prep_time").value;
+
+    document.getElementById("pExpiry").innerText =
+        document.getElementById("expiry_time").value;
+
+    document.getElementById("pPhone").innerText =
+        document.getElementById("phone").value;
+}
+async function updateMapFromAddress(){
+
+    let address =
+        document.getElementById("address").value;
+
+    try{
+
+        let response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+        );
+
+        let data = await response.json();
+
+        if(data.length > 0){
+
+            let lat = data[0].lat;
+            let lon = data[0].lon;
+
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lon;
+
+            document.getElementById("mapFrame").src =
+                `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+        }
+
+    }catch(error){
+
+        console.log(error);
+
+        alert(error);
+
+    }
+}
+function openGoogleMaps(){
+
+    let lat =
+        document.getElementById("latitude").value;
+
+    let lon =
+        document.getElementById("longitude").value;
+
+    window.open(
+        `https://www.google.com/maps?q=${lat},${lon}`,
+        "_blank"
+    );
+
+}
+</script>
+
+</body>
+</html>
