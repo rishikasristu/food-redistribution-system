@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = "foodredistribution"
 
 # MySQL Connection
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:rishika%4008@localhost/foodredistribution'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:TUcaEoZHqldRNfhyoUGhcsfVVsskfNbd@yamabiko.proxy.rlwy.net:39246/railway'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -90,6 +90,9 @@ def submit():
 
     prep_time = request.form["prep_time"]
 
+    if prep_time == "":
+        prep_time = None
+
     expiry_time = request.form["expiry_time"]
 
     description = request.form["description"]
@@ -113,12 +116,29 @@ def submit():
     image.save(image_path)
 
 
+
+
     priority_score = 0
 
-    expiry_dt = datetime.strptime(
-        expiry_time,
-        "%Y-%m-%dT%H:%M"
-    )
+    print("Food Type =", food_type)
+    print("Expiry Time =", expiry_time)
+
+    if not expiry_time:
+        return "Please select Expiry Date/Time"
+
+    if "T" in expiry_time:
+
+        expiry_dt = datetime.strptime(
+            expiry_time,
+            "%Y-%m-%dT%H:%M"
+        )
+
+    else:
+
+        expiry_dt = datetime.strptime(
+            expiry_time,
+            "%Y-%m-%d"
+        )
 
     hours_left = (
         expiry_dt - datetime.now()

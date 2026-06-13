@@ -456,27 +456,23 @@ function toggleFields(){
     if(type === "Cooked Food"){
 
         desc.style.display = "block";
-
         prep.style.display = "block";
-
         donation.style.display = "none";
 
-        expiryLabel.innerText =
-            "Expiry Time";
+        expiryLabel.innerText = "Expiry Time";
         expiryField.type = "datetime-local";
+        expiryField.value = "";
 
     }
     else{
 
         desc.style.display = "none";
-
         prep.style.display = "none";
-
         donation.style.display = "block";
 
-        expiryLabel.innerText =
-            "Expiry Date";
+        expiryLabel.innerText = "Expiry Date";
         expiryField.type = "date";
+        expiryField.value = "";
 
     }
 
