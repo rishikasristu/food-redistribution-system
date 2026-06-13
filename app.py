@@ -75,8 +75,15 @@ class User(db.Model):
 # Home Page
 @app.route("/")
 def home():
-    return render_template("donor.html")
+    return redirect("/register")
 
+@app.route("/donate")
+def donate():
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    return render_template("donor.html")
 
 # Submit Donation
 @app.route("/submit", methods=["POST"])
