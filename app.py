@@ -69,6 +69,7 @@ class User(db.Model):
     name = db.Column(db.String(100))
     phone = db.Column(db.String(15))
     email = db.Column(db.String(100))
+    address = db.Column(db.Text)
     userid = db.Column(db.String(50))
     password = db.Column(db.String(100))
 
@@ -83,8 +84,14 @@ def donate():
     if "user_id" not in session:
         return redirect("/login")
 
-    return render_template("donor.html")
+    user = User.query.get(
+        session["user_id"]
+    )
 
+    return render_template(
+        "donor.html",
+        user=user
+    )
 # Submit Donation
 @app.route("/submit", methods=["POST"])
 def submit():
@@ -410,6 +417,17 @@ def dashboard():
     return render_template(
         "dashboard.html",
         name=session["name"]
+    )
+@app.route("/profile")
+def profile():
+
+    user = User.query.get(
+        session["user_id"]
+    )
+
+    return render_template(
+        "profile.html",
+        user=user
     )
 @app.route("/logout")
 def logout():

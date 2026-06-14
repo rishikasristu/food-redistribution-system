@@ -29,12 +29,12 @@ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
         <div class="mb-3">
             <label class="form-label">Food Name</label>
-            <input type="text"
-                    id="food_name"
-                    name="food_name"
-                    class="form-control"
-                    
-                    required>
+            <input type="tel"
+                id="phone"
+                name="phone"
+                class="form-control"
+                value="{{ user.phone }}"
+            required>
         </div>
         <div class="mb-3">
 
@@ -199,6 +199,7 @@ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
                 id="address"
                 name="address"
                 class="form-control"
+                value="{{ user.address }}"
                 oninput="searchAddress()"
                 onchange="updateMapFromAddress()">
 
