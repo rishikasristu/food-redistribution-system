@@ -429,6 +429,34 @@ def profile():
         "profile.html",
         user=user
     )
+@app.route("/edit_profile")
+def edit_profile():
+
+    user = User.query.get(
+        session["user_id"]
+    )
+
+    return render_template(
+        "edit_profile.html",
+        user=user
+    )
+@app.route("/update_profile", methods=["POST"])
+def update_profile():
+
+    user = User.query.get(
+        session["user_id"]
+    )
+
+    user.name = request.form["name"]
+    user.phone = request.form["phone"]
+    user.email = request.form["email"]
+    user.address = request.form["address"]
+
+    db.session.commit()
+
+    session["name"] = user.name
+
+    return redirect("/profile")
 @app.route("/logout")
 def logout():
 
