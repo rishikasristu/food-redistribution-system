@@ -414,9 +414,34 @@ def history():
 @app.route("/dashboard")
 def dashboard():
 
+    user_id = session["user_id"]
+
+    total = Donation.query.filter_by(
+        user_id=user_id
+    ).count()
+
+    pending = Donation.query.filter_by(
+        user_id=user_id,
+        status="Pending"
+    ).count()
+
+    accepted = Donation.query.filter_by(
+        user_id=user_id,
+        status="Accepted"
+    ).count()
+
+    expired = Donation.query.filter_by(
+        user_id=user_id,
+        status="Expired"
+    ).count()
+
     return render_template(
         "dashboard.html",
-        name=session["name"]
+        name=session["name"],
+        total=total,
+        pending=pending,
+        accepted=accepted,
+        expired=expired
     )
 @app.route("/profile")
 def profile():
