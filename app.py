@@ -457,6 +457,17 @@ def update_profile():
     session["name"] = user.name
 
     return redirect("/profile")
+@app.route("/tracking")
+def tracking():
+
+    donations = Donation.query.filter_by(
+        user_id=session["user_id"]
+    ).all()
+
+    return render_template(
+        "tracking.html",
+        donations=donations
+    )
 @app.route("/logout")
 def logout():
 
