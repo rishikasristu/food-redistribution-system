@@ -339,10 +339,17 @@ navigator.geolocation.getCurrentPosition(async function(position){
 
         let addr = data.address;
 
-        document.getElementById("address").value =
-        (addr.suburb || "") + ", " +
-        (addr.city || addr.town || addr.village || "") + ", " +
-        (addr.state || "");
+        if(
+            document.getElementById("address").value == ""
+        )
+        {
+
+            document.getElementById("address").value =
+            (addr.suburb || "") + ", " +
+            (addr.city || addr.town || addr.village || "") + ", " +
+            (addr.state || "");
+
+        }
 
     }
     catch(error){
