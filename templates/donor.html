@@ -140,8 +140,11 @@ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
             <input
                 type="date"
+                id="donation_date"
                 name="donation_date"
-                class="form-control">
+                class="form-control"
+                value="{{ today }}"
+                readonly>
 
         </div>
 
@@ -157,7 +160,9 @@ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
             <input type="datetime-local"
                     id = "expiry_time"
                    name="expiry_time"
-                   class="form-control">
+                   class="form-control"
+                   class="form-control"
+                    min="{{ today }}">
         </div>
 
 

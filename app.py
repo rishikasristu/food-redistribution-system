@@ -90,7 +90,8 @@ def donate():
 
     return render_template(
         "donor.html",
-        user=user
+        user=user,
+        today=date.today().strftime("%Y-%m-%d")
     )
 # Submit Donation
 @app.route("/submit", methods=["POST"])
