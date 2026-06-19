@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, session
 from sqlalchemy.exc import IntegrityError
 from flask_sqlalchemy import SQLAlchemy
 from geopy.distance import geodesic
-from datetime import datetime
+from datetime import datetime , date
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
