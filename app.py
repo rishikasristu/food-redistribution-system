@@ -73,6 +73,35 @@ class User(db.Model):
     userid = db.Column(db.String(50))
     password = db.Column(db.String(100))
 
+class Receiver(db.Model):
+
+    __tablename__ = "receivers"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    organization_name = db.Column(
+        db.String(200)
+    )
+
+    phone = db.Column(
+        db.String(20)
+    )
+
+    email = db.Column(
+        db.String(100)
+    )
+
+    password = db.Column(
+        db.String(100)
+    )
+
+    address = db.Column(
+        db.Text
+    )
+
 # Home Page
 @app.route("/")
 def home():
@@ -500,5 +529,44 @@ def logout():
     session.clear()
 
     return redirect("/login")
+
+@app.route(
+    "/receiver_register",
+    methods=["GET", "POST"]
+)
+def receiver_register():
+
+    if request.method == "POST":
+
+        receiver = Receiver(
+
+            organization_name=
+            request.form["organization_name"],
+
+            phone=
+            request.form["phone"],
+
+            email=
+            request.form["email"],
+
+            address=
+            request.form["address"],
+
+            password=
+            request.form["password"]
+
+        )
+
+        db.session.add(receiver)
+
+        db.session.commit()
+
+        return redirect(
+            "/receiver_login"
+        )
+
+    return render_template(
+        "receiver_register.html"
+    )
 if __name__ == "__main__":
     app.run(debug=True)
