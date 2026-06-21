@@ -327,6 +327,9 @@ def receiver():
     donations = Donation.query.order_by(
         Donation.priority_score.desc()
     ).all()
+    collected = Donation.query.filter_by(
+        status="Collected"
+    ).count()
 
     return render_template(
         "receiver.html",
@@ -334,7 +337,8 @@ def receiver():
         total=total,
         pending=pending,
         accepted=accepted,
-        expired=expired
+        expired=expired,
+        collected = collected
     )
 @app.route("/accept/<int:id>")
 def accept(id):
@@ -562,11 +566,95 @@ def receiver_register():
         db.session.commit()
 
         return redirect(
-            "/receiver_login"
+            "/receiver"
         )
 
     return render_template(
         "receiver_register.html"
     )
+
+@app.route(
+    "/receiver_login",
+    methods=["GET", "POST"]
+)
+def receiver_login():
+
+    if request.method == "POST":
+
+        receiver = Receiver.query.filter_by(
+
+            email=request.form["email"],
+
+            password=request.form["password"]
+
+        ).first()
+
+        if receiver:
+
+            session["receiver_id"] = receiver.id
+
+            session["receiver_name"] = (
+                receiver.organization_name
+            )
+
+            return redirect(
+                "/receiver_dashboard"
+            )
+
+        return "Invalid Login"
+
+    return render_template(
+        "receiver_login.html"
+    )
+
+@app.route("/receiver_dashboard")
+def receiver_dashboard():
+
+    if "receiver_id" not in session:
+
+        return redirect(
+            "/receiver_login"
+        )
+
+    return render_template(
+        "receiver_dashboard.html",
+        name=session["receiver_name"]
+    )
+
+
+@app.route("/receiver_profile")
+def receiver_profile():
+
+    receiver = Receiver.query.get(
+        session["receiver_id"]
+    )
+
+    return render_template(
+        "receiver_profile.html",
+        receiver=receiver
+    )
+
+@app.route("/accepted_donations")
+def accepted_donations():
+
+    donations = Donation.query.filter_by(
+        status="Accepted"
+    ).all()
+
+    return render_template(
+        "accepted_donations.html",
+        donations=donations
+    )
+
+@app.route("/collect/<int:id>")
+def collect(id):
+
+    donation = Donation.query.get(id)
+
+    donation.status = "Collected"
+
+    db.session.commit()
+
+    return redirect("/accepted_donations")
 if __name__ == "__main__":
     app.run(debug=True)
