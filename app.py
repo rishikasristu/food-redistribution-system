@@ -184,6 +184,19 @@ def submit():
             "%Y-%m-%d"
         )
 
+
+    if food_type == "Cooked Food":
+
+        if expiry_dt < datetime.now():
+
+            return "Cooked food expiry must be in the future."
+
+    else:
+
+        if expiry_dt.date() < date.today():
+
+            return "Expiry date cannot be in the past."
+
     hours_left = (
         expiry_dt - datetime.now()
     ).total_seconds() / 3600
