@@ -324,7 +324,16 @@ def receiver():
         status="Expired"
     ).count()
 
-    donations = Donation.query.order_by(
+    search = request.args.get(
+        "search",
+        ""
+    )
+
+    donations = Donation.query.filter(
+        Donation.food_name.ilike(
+            f"%{search}%"
+        )
+    ).order_by(
         Donation.priority_score.desc()
     ).all()
     collected = Donation.query.filter_by(
@@ -634,6 +643,19 @@ def receiver_profile():
         receiver=receiver
     )
 
+@app.route(
+    "/edit_receiver_profile"
+)
+def edit_receiver_profile():
+
+    receiver = Receiver.query.get(
+        session["receiver_id"]
+    )
+
+    return render_template(
+        "edit_receiver_profile.html",
+        receiver=receiver
+    )
 @app.route("/accepted_donations")
 def accepted_donations():
 
@@ -646,6 +668,36 @@ def accepted_donations():
         donations=donations
     )
 
+@app.route("/receiver_analytics")
+def receiver_analytics():
+
+    total = Donation.query.count()
+
+    pending = Donation.query.filter_by(
+        status="Pending"
+    ).count()
+
+    accepted = Donation.query.filter_by(
+        status="Accepted"
+    ).count()
+
+    expired = Donation.query.filter_by(
+        status="Expired"
+    ).count()
+
+    collected = Donation.query.filter_by(
+        status="Collected"
+    ).count()
+
+    return render_template(
+        "receiver_analytics.html",
+        total=total,
+        pending=pending,
+        accepted=accepted,
+        expired=expired,
+        collected=collected
+    )
+
 @app.route("/collect/<int:id>")
 def collect(id):
 
@@ -656,5 +708,22 @@ def collect(id):
     db.session.commit()
 
     return redirect("/accepted_donations")
+
+@app.route("/receiver_logout")
+def receiver_logout():
+
+    session.pop(
+        "receiver_id",
+        None
+    )
+
+    session.pop(
+        "receiver_name",
+        None
+    )
+
+    return redirect(
+        "/receiver_login"
+    )
 if __name__ == "__main__":
     app.run(debug=True)
