@@ -653,14 +653,44 @@ def receiver_login():
 def receiver_dashboard():
 
     if "receiver_id" not in session:
+        return redirect("/receiver_login")
 
-        return redirect(
-            "/receiver_login"
-        )
+    total = Donation.query.count()
+
+    pending = Donation.query.filter_by(
+        status="Pending"
+    ).count()
+
+    accepted = Donation.query.filter_by(
+        status="Accepted"
+    ).count()
+
+    collected = Donation.query.filter_by(
+        status="Collected"
+    ).count()
+
+    expired = Donation.query.filter_by(
+        status="Expired"
+    ).count()
+
+    rejected = Donation.query.filter_by(
+        status="Rejected"
+    ).count()
+
+    scheduled = Donation.query.filter(
+        Donation.scheduled_time != None
+    ).count()
 
     return render_template(
         "receiver_dashboard.html",
-        name=session["receiver_name"]
+        name=session["receiver_name"],
+        total=total,
+        pending=pending,
+        accepted=accepted,
+        collected=collected,
+        expired=expired,
+        rejected=rejected,
+        scheduled=scheduled
     )
 
 
