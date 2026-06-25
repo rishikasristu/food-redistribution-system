@@ -216,9 +216,11 @@
                 </a>
                 {% if donation.status == "Rejected" %}
 
-                <a href="/delete/{{ donation.donation_id }}"
-                     class="btn btn-secondary btn-sm">
-                        Delete
+                <a href="/archive/{{ donation.donation_id }}"
+                    class="btn btn-secondary btn-sm">
+
+                        Archive
+
                 </a>
 
                 {% endif %}
