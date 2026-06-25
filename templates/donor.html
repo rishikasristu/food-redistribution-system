@@ -25,7 +25,10 @@ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
         🍱 Food Donation Form
     </h2>
 
-    <form action="/submit" method="POST" enctype="multipart/form-data">
+    <form action="/submit"
+      method="POST"
+      enctype="multipart/form-data"
+      onsubmit="return validateExpiry()">
 
         <div class="mb-3">
             <label class="form-label">Food Name</label>
@@ -163,6 +166,22 @@ href="https://unpkg.com/leaflet/dist/leaflet.css"/>
                    class="form-control"
                    class="form-control"
                     min="{{ today }}T00:00">
+        </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+
+                    Schedule Pickup Time (Optional)
+
+                </label>
+
+            <input
+                type="datetime-local"
+                id="scheduled_time"
+                name="scheduled_time"
+                class="form-control">
+
         </div>
 
 
@@ -473,7 +492,6 @@ function toggleFields(){
         document.getElementById(
             "expiry_time"
         );
-
     if(type === "Cooked Food"){
 
         desc.style.display = "block";
@@ -482,6 +500,9 @@ function toggleFields(){
 
         expiryLabel.innerText = "Expiry Time";
         expiryField.type = "datetime-local";
+
+        expiryField.min = "{{ today }}";
+
         expiryField.value = "";
 
     }
@@ -493,9 +514,14 @@ function toggleFields(){
 
         expiryLabel.innerText = "Expiry Date";
         expiryField.type = "date";
+
+        expiryField.min = "{{ today[:10] }}";
+
         expiryField.value = "";
 
     }
+
+    
 
 }
 async function searchAddress(){
@@ -550,6 +576,52 @@ function selectAddress(address){
 
     updateMapFromAddress();
 
+}
+function validateExpiry(){
+
+    let foodType =
+        document.getElementById("food_type").value;
+
+    let expiry =
+        document.getElementById("expiry_time").value;
+
+    if(!expiry){
+        return true;
+    }
+
+    let expiryDate = new Date(expiry);
+    let now = new Date();
+
+    if(foodType === "Cooked Food"){
+
+        if(expiryDate <= now){
+
+            alert(
+                "Cooked food expiry must be in the future."
+            );
+
+            return false;
+        }
+
+    }else{
+
+        let today = new Date();
+
+        today.setHours(0,0,0,0);
+
+        expiryDate.setHours(0,0,0,0);
+
+        if(expiryDate < today){
+
+            alert(
+                "Expiry date cannot be in the past."
+            );
+
+            return false;
+        }
+    }
+
+    return true;
 }
 </script>
 

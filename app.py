@@ -29,6 +29,8 @@ class Donation(db.Model):
     prep_time = db.Column(db.String(50))
     expiry_time = db.Column(db.DateTime)
 
+    scheduled_time = db.Column(
+    db.DateTime)
     description = db.Column(db.Text)
 
     donor_phone = db.Column(db.String(15))
@@ -120,7 +122,7 @@ def donate():
     return render_template(
         "donor.html",
         user=user,
-        today=date.today().strftime("%Y-%m-%d")
+        today=datetime.now().strftime("%Y-%m-%dT%H:%M")
     )
 # Submit Donation
 @app.route("/submit", methods=["POST"])
@@ -138,6 +140,8 @@ def submit():
         prep_time = None
 
     expiry_time = request.form["expiry_time"]
+
+    scheduled_time = request.form.get("scheduled_time")
 
     description = request.form["description"]
 
@@ -183,7 +187,22 @@ def submit():
             expiry_time,
             "%Y-%m-%d"
         )
+    if scheduled_time:
 
+        scheduled_dt = datetime.strptime(
+            scheduled_time,
+            "%Y-%m-%dT%H:%M"
+        )
+
+    else:
+
+        scheduled_dt = None
+    print("========== DEBUG ==========")
+    print("Food Type:", repr(food_type))
+    print("Expiry DT:", expiry_dt)
+    print("Current :", datetime.now())
+    print("Expired?", expiry_dt < datetime.now())
+    print("===========================")
 
     if food_type == "Cooked Food":
 
@@ -240,6 +259,7 @@ def submit():
 
         priority_score=priority_score,
 
+        scheduled_time=scheduled_dt,
 
         description=description,
 

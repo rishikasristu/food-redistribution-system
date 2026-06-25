@@ -70,6 +70,8 @@
                         <th>Status</th>
 
                         <th>Expiry</th>
+                        
+                        <th>Scheduled Pickup</th>
 
                     </tr>
 
@@ -139,6 +141,20 @@
 
                         <td>
                             {{ d.expiry_time }}
+                        </td>
+
+                        <td>
+
+                        {% if donation.scheduled_time %}
+
+                            {{ donation.scheduled_time }}
+
+                        {% else %}
+
+                                -
+
+                        {% endif %}
+
                         </td>
 
                     </tr>

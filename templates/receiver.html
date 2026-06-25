@@ -80,6 +80,7 @@
             <th>Quantity</th>
             <th>Preparation Time</th>
             <th>Expiry Time</th>
+            <th>Scheduled Pickup</th>
             <th>Phone</th>
             <th>Image</th>
             <th>Map</th>
@@ -110,6 +111,20 @@
             <td>{{ donation.prep_time }}</td>
 
             <td>{{ donation.expiry_time }}</td>
+
+            <td>
+
+            {% if donation.scheduled_time %}
+
+                {{ donation.scheduled_time }}
+
+            {% else %}
+
+                -
+
+            {% endif %}
+
+            </td>
 
             <td>{{ donation.donor_phone }}</td>
 
