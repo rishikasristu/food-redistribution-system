@@ -719,6 +719,19 @@ def edit_receiver_profile():
         "edit_receiver_profile.html",
         receiver=receiver
     )
+@app.route("/scheduled_donations")
+def scheduled_donations():
+
+    donations = Donation.query.filter(
+        Donation.scheduled_time != None
+    ).order_by(
+        Donation.scheduled_time.asc()
+    ).all()
+
+    return render_template(
+        "scheduled_donations.html",
+        donations=donations
+    )
 @app.route("/accepted_donations")
 def accepted_donations():
 
