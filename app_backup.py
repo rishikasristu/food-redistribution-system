@@ -368,7 +368,7 @@ def receiver():
     )
 
     donations = Donation.query.filter(
-        Donation.archived == False,
+        """Donation.archived == False,"""
         Donation.food_name.ilike(
             f"%{search}%"
         )
@@ -819,7 +819,7 @@ def receiver_logout():
     return redirect(
         "/receiver_login"
     )
-@app.route("/archive")
+"""@app.route("/archive")
 def archive_page():
 
     donations = Donation.query.filter_by(
@@ -829,6 +829,6 @@ def archive_page():
     return render_template(
         "archive.html",
         donations=donations
-    )
+    )"""
 if __name__ == "__main__":
     app.run(debug=True)
