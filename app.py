@@ -440,7 +440,7 @@ def archive(id):
 
     donation.status = "Archived"
 
-    "donation.archived = True"
+    
 
     db.session.commit()
 
