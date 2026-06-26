@@ -48,10 +48,10 @@ class Donation(db.Model):
     user_id = db.Column(db.Integer)
     status = db.Column(db.String(20))
 
-    archived = db.Column(
+    """archived = db.Column(
         db.Boolean,
         default=False
-    )
+    )"""
 
 class Organization(db.Model):
     __tablename__ = "organizations"
@@ -418,7 +418,7 @@ def delete(id):
     db.session.commit()
 
     return redirect("/receiver")"""
-@app.route("/archive/<int:id>")
+"""@app.route("/archive/<int:id>")
 def archive(id):
 
     donation = Donation.query.get(id)
@@ -429,7 +429,7 @@ def archive(id):
 
     db.session.commit()
 
-    return redirect("/receiver")
+    return redirect("/receiver")"""
 @app.route("/register")
 def register_page():
 
