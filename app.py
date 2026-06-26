@@ -48,10 +48,7 @@ class Donation(db.Model):
     user_id = db.Column(db.Integer)
     status = db.Column(db.String(20))
 
-    archived = db.Column(
-        db.Boolean,
-        default=False
-    )
+    
 
 class Organization(db.Model):
     __tablename__ = "organizations"
