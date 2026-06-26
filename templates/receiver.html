@@ -214,12 +214,24 @@
                     Reject
 
                 </a>
-                {% if donation.status == "Rejected" %}
+                <!--{% if donation.status == "Rejected" %}
 
                 <a href="/archive/{{ donation.donation_id }}"
                     class="btn btn-secondary btn-sm">
 
                         Archive
+
+                </a>
+
+                {% endif %} -->
+                {% if donation.status == "Rejected"
+                    or donation.status == "Collected"
+                    or donation.status == "Expired" %}
+
+                <a href="/archive/{{ donation.donation_id }}"
+                    class="btn btn-secondary btn-sm">
+
+                Archive
 
                 </a>
 

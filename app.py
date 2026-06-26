@@ -408,7 +408,7 @@ def reject(id):
     db.session.commit()
 
     return redirect("/receiver")
-@app.route("/delete/<int:id>")
+"""@app.route("/delete/<int:id>")
 def delete(id):
 
     donation = Donation.query.get(id)
@@ -417,13 +417,15 @@ def delete(id):
 
     db.session.commit()
 
-    return redirect("/receiver")
+    return redirect("/receiver")"""
 @app.route("/archive/<int:id>")
 def archive(id):
 
     donation = Donation.query.get(id)
 
-    donation.archived = True
+    donation.status = "Archived"
+
+    "donation.archived = True"
 
     db.session.commit()
 
@@ -816,6 +818,17 @@ def receiver_logout():
 
     return redirect(
         "/receiver_login"
+    )
+@app.route("/archive")
+def archive_page():
+
+    donations = Donation.query.filter_by(
+        status="Archived"
+    ).all()
+
+    return render_template(
+        "archive.html",
+        donations=donations
     )
 if __name__ == "__main__":
     app.run(debug=True)
