@@ -110,10 +110,28 @@ class Receiver(db.Model):
     )
 
 # Home Page
+"""@app.route("/")
+def home():
+    return redirect("/register")"""
 @app.route("/")
 def home():
-    return redirect("/register")
 
+    return render_template(
+        "index.html"
+    )
+
+@app.route("/donor_home")
+def donor_home():
+
+    return render_template(
+        "donor_home.html"
+    )
+@app.route("/receiver_home")
+def receiver_home():
+
+    return render_template(
+        "receiver_home.html"
+    )
 @app.route("/donate")
 def donate():
 
