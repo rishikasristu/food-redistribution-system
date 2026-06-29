@@ -106,6 +106,55 @@ class Receiver(db.Model):
         db.Text
     )
 
+class Volunteer(db.Model):
+
+    volunteer_id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    name = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    phone = db.Column(
+        db.String(20),
+        nullable=False
+    )
+
+    email = db.Column(
+        db.String(100),
+        unique=True,
+        nullable=False
+    )
+
+    password = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    address = db.Column(
+        db.Text
+    )
+
+    vehicle = db.Column(
+        db.String(30)
+    )
+
+    availability = db.Column(
+        db.String(20),
+        default="Available"
+    )
+
+    max_distance = db.Column(
+        db.Integer
+    )
+
+    joined_on = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
 # Home Page
 """@app.route("/")
 def home():
@@ -845,5 +894,38 @@ def archive_page():
         "archive.html",
         donations=donations
     )"""
+
+@app.route("/volunteer_register", methods=["GET", "POST"])
+def volunteer_register():
+
+    if request.method == "POST":
+
+        volunteer = Volunteer(
+
+            name=request.form["name"],
+
+            phone=request.form["phone"],
+
+            email=request.form["email"],
+
+            password=request.form["password"],
+
+            address=request.form["address"],
+
+            vehicle=request.form["vehicle"],
+
+            max_distance=request.form["max_distance"]
+
+        )
+
+        db.session.add(volunteer)
+
+        db.session.commit()
+
+        return redirect("/volunteer_login")
+
+    return render_template(
+        "volunteer_register.html"
+    )
 if __name__ == "__main__":
     app.run(debug=True)
