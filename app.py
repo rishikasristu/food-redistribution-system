@@ -860,16 +860,6 @@ def accepted_donations():
         volunteers=volunteers
     )
 
-"""@app.route("/assign_volunteer/<int:id>", methods=["POST"])
-def assign_volunteer(id):
-
-    donation = Donation.query.get_or_404(id)
-
-    donation.volunteer_id = request.form["volunteer_id"]
-
-    db.session.commit()
-
-    return redirect("/accepted_donations")"""
 @app.route("/assign_volunteer/<int:id>", methods=["POST"])
 def assign_volunteer(id):
 
@@ -978,7 +968,8 @@ def volunteer_register():
 
             vehicle=request.form["vehicle"],
 
-            max_distance=request.form["max_distance"]
+            max_distance=request.form["max_distance"],
+            availability="Available"
 
         )
 
@@ -1068,21 +1059,23 @@ def assigned_pickups():
         "assigned_pickups.html",
         donations=donations
     )
-@app.route("/accept_assignment/<int:id>")
-def accept_assignment(id):
+@app.route("/assign_volunteer/<int:id>", methods=["POST"])
+def assign_volunteer(id):
 
-    if "volunteer_id" not in session:
-        return redirect("/volunteer_login")
+    if "receiver_id" not in session:
+        return redirect("/receiver_login")
 
     donation = Donation.query.get_or_404(id)
 
-    donation.volunteer_response = "Accepted"
+    volunteer_id = int(request.form["volunteer_id"])
 
-    donation.pickup_status = "Volunteer Accepted"
+    donation.volunteer_id = volunteer_id
+    donation.volunteer_response = "Pending"
+    donation.pickup_status = "Assigned"
 
     db.session.commit()
 
-    return redirect("/assigned_pickups")
+    return redirect("/accepted_donations")
 
 @app.route("/decline_assignment/<int:id>")
 def decline_assignment(id):
