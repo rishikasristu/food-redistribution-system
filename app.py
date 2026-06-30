@@ -16,39 +16,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Donations Table
-class Donation(db.Model):
-    __tablename__ = "donations"
-
-
-    donation_id = db.Column(db.Integer, primary_key=True)
-
-    food_name = db.Column(db.String(200))
-    food_type = db.Column(db.String(50))
-    quantity = db.Column(db.String(100))
-
-    prep_time = db.Column(db.String(50))
-    expiry_time = db.Column(db.DateTime)
-
-    scheduled_time = db.Column(
-    db.DateTime)
-    description = db.Column(db.Text)
-
-    donor_phone = db.Column(db.String(15))
-    donor_address = db.Column(db.Text)
-
-    donor_latitude = db.Column(db.Float)
-    donor_longitude = db.Column(db.Float)
-
-    image_path = db.Column(db.String(255))
-    priority_score = db.Column(
-        db.Float,
-        default=0
-    )
-
-    user_id = db.Column(db.Integer)
-    status = db.Column(db.String(20))
-
-    
 
 class Organization(db.Model):
     __tablename__ = "organizations"
@@ -108,6 +75,7 @@ class Receiver(db.Model):
 
 class Volunteer(db.Model):
 
+    __tablename__ = "volunteers"
     volunteer_id = db.Column(
         db.Integer,
         primary_key=True
@@ -155,6 +123,41 @@ class Volunteer(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+
+
+class Donation(db.Model):
+    __tablename__ = "donations"
+
+
+    donation_id = db.Column(db.Integer, primary_key=True)
+
+    food_name = db.Column(db.String(200))
+    food_type = db.Column(db.String(50))
+    quantity = db.Column(db.String(100))
+
+    prep_time = db.Column(db.String(50))
+    expiry_time = db.Column(db.DateTime)
+
+    scheduled_time = db.Column(
+    db.DateTime)
+    description = db.Column(db.Text)
+
+    donor_phone = db.Column(db.String(15))
+    donor_address = db.Column(db.Text)
+
+    donor_latitude = db.Column(db.Float)
+    donor_longitude = db.Column(db.Float)
+
+    image_path = db.Column(db.String(255))
+    priority_score = db.Column(
+        db.Float,
+        default=0
+    )
+
+    user_id = db.Column(db.Integer)
+    status = db.Column(db.String(20))
+
+    
 # Home Page
 """@app.route("/")
 def home():
@@ -965,5 +968,48 @@ def volunteer_dashboard():
         "volunteer_dashboard.html",
         name=session["volunteer_name"]
     )
+@app.route("/volunteer_profile")
+def volunteer_profile():
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    volunteer = Volunteer.query.get(
+        session["volunteer_id"]
+    )
+
+    return render_template(
+        "volunteer_profile.html",
+        volunteer=volunteer
+    )
+
+@app.route("/volunteer_history")
+def volunteer_history():
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    return render_template(
+        "volunteer_history.html"
+    )
+
+@app.route("/assigned_pickups")
+def assigned_pickups():
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    return render_template(
+        "assigned_pickups.html"
+    )
+
+@app.route("/volunteer_logout")
+def volunteer_logout():
+
+    session.pop("volunteer_id", None)
+    session.pop("volunteer_name", None)
+
+    return redirect("/volunteer_login")
+
 if __name__ == "__main__":
     app.run(debug=True)
