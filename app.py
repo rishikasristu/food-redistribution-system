@@ -1011,12 +1011,25 @@ def volunteer_login():
 def volunteer_dashboard():
 
     if "volunteer_id" not in session:
-
         return redirect("/volunteer_login")
+
+    volunteer = Volunteer.query.get(session["volunteer_id"])
+
+    assigned = Donation.query.filter(
+        Donation.volunteer_id == session["volunteer_id"],
+        Donation.status != "Delivered"
+    ).count()
+
+    completed = Donation.query.filter(
+        Donation.volunteer_id == session["volunteer_id"],
+        Donation.status == "Delivered"
+    ).count()
 
     return render_template(
         "volunteer_dashboard.html",
-        name=session["volunteer_name"]
+        volunteer=volunteer,
+        assigned=assigned,
+        completed=completed
     )
 @app.route("/volunteer_profile")
 def volunteer_profile():
@@ -1088,6 +1101,31 @@ def decline_assignment(id):
     donation.pickup_status = "Waiting for Volunteer"
 
     db.session.commit()
+
+    return redirect("/assigned_pickups")
+
+@app.route("/update_pickup_status/<int:id>/<status>")
+def update_pickup_status(id, status):
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    donation = Donation.query.get_or_404(id)
+
+    allowed_status = [
+        "Travelling",
+        "Reached",
+        "Collected",
+        "Delivered"
+    ]
+
+    if status in allowed_status:
+        donation.pickup_status = status
+
+        if status == "Delivered":
+            donation.status = "Delivered"
+
+        db.session.commit()
 
     return redirect("/assigned_pickups")
 
