@@ -927,5 +927,43 @@ def volunteer_register():
     return render_template(
         "volunteer_register.html"
     )
+
+@app.route("/volunteer_login", methods=["GET", "POST"])
+def volunteer_login():
+
+    if request.method == "POST":
+
+        email = request.form["email"]
+        password = request.form["password"]
+
+        volunteer = Volunteer.query.filter_by(
+            email=email,
+            password=password
+        ).first()
+
+        if volunteer:
+
+            session["volunteer_id"] = volunteer.volunteer_id
+            session["volunteer_name"] = volunteer.name
+
+            return redirect("/volunteer_dashboard")
+
+        return "Invalid Email or Password"
+
+    return render_template(
+        "volunteer_login.html"
+    )
+
+@app.route("/volunteer_dashboard")
+def volunteer_dashboard():
+
+    if "volunteer_id" not in session:
+
+        return redirect("/volunteer_login")
+
+    return render_template(
+        "volunteer_dashboard.html",
+        name=session["volunteer_name"]
+    )
 if __name__ == "__main__":
     app.run(debug=True)
