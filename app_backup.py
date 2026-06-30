@@ -16,42 +16,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Donations Table
-class Donation(db.Model):
-    __tablename__ = "donations"
-
-
-    donation_id = db.Column(db.Integer, primary_key=True)
-
-    food_name = db.Column(db.String(200))
-    food_type = db.Column(db.String(50))
-    quantity = db.Column(db.String(100))
-
-    prep_time = db.Column(db.String(50))
-    expiry_time = db.Column(db.DateTime)
-
-    scheduled_time = db.Column(
-    db.DateTime)
-    description = db.Column(db.Text)
-
-    donor_phone = db.Column(db.String(15))
-    donor_address = db.Column(db.Text)
-
-    donor_latitude = db.Column(db.Float)
-    donor_longitude = db.Column(db.Float)
-
-    image_path = db.Column(db.String(255))
-    priority_score = db.Column(
-        db.Float,
-        default=0
-    )
-
-    user_id = db.Column(db.Integer)
-    status = db.Column(db.String(20))
-
-    """archived = db.Column(
-        db.Boolean,
-        default=False
-    )"""
 
 class Organization(db.Model):
     __tablename__ = "organizations"
@@ -109,11 +73,114 @@ class Receiver(db.Model):
         db.Text
     )
 
+class Volunteer(db.Model):
+
+    __tablename__ = "volunteers"
+    volunteer_id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    name = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    phone = db.Column(
+        db.String(20),
+        nullable=False
+    )
+
+    email = db.Column(
+        db.String(100),
+        unique=True,
+        nullable=False
+    )
+
+    password = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    address = db.Column(
+        db.Text
+    )
+
+    vehicle = db.Column(
+        db.String(30)
+    )
+
+    availability = db.Column(
+        db.String(20),
+        default="Available"
+    )
+
+    max_distance = db.Column(
+        db.Integer
+    )
+
+    joined_on = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+class Donation(db.Model):
+    __tablename__ = "donations"
+
+
+    donation_id = db.Column(db.Integer, primary_key=True)
+
+    food_name = db.Column(db.String(200))
+    food_type = db.Column(db.String(50))
+    quantity = db.Column(db.String(100))
+
+    prep_time = db.Column(db.String(50))
+    expiry_time = db.Column(db.DateTime)
+
+    scheduled_time = db.Column(
+    db.DateTime)
+    description = db.Column(db.Text)
+
+    donor_phone = db.Column(db.String(15))
+    donor_address = db.Column(db.Text)
+
+    donor_latitude = db.Column(db.Float)
+    donor_longitude = db.Column(db.Float)
+
+    image_path = db.Column(db.String(255))
+    priority_score = db.Column(
+        db.Float,
+        default=0
+    )
+
+    user_id = db.Column(db.Integer)
+    status = db.Column(db.String(20))
+
+    
 # Home Page
+"""@app.route("/")
+def home():
+    return redirect("/register")"""
 @app.route("/")
 def home():
-    return redirect("/register")
 
+    return render_template(
+        "index.html"
+    )
+
+@app.route("/donor_home")
+def donor_home():
+
+    return render_template(
+        "donor_home.html"
+    )
+@app.route("/receiver_home")
+def receiver_home():
+
+    return render_template(
+        "receiver_home.html"
+    )
 @app.route("/donate")
 def donate():
 
@@ -368,7 +435,7 @@ def receiver():
     )
 
     donations = Donation.query.filter(
-        """Donation.archived == False,"""
+        
         Donation.food_name.ilike(
             f"%{search}%"
         )
@@ -425,7 +492,7 @@ def archive(id):
 
     donation.status = "Archived"
 
-    "donation.archived = True"
+    
 
     db.session.commit()
 
@@ -757,10 +824,26 @@ def accepted_donations():
         status="Accepted"
     ).all()
 
+    volunteers = Volunteer.query.filter_by(
+        availability="Available"
+    ).all()
+
     return render_template(
         "accepted_donations.html",
-        donations=donations
+        donations=donations,
+        volunteers=volunteers
     )
+
+@app.route("/assign_volunteer/<int:id>", methods=["POST"])
+def assign_volunteer(id):
+
+    donation = Donation.query.get_or_404(id)
+
+    donation.volunteer_id = request.form["volunteer_id"]
+
+    db.session.commit()
+
+    return redirect("/accepted_donations")
 
 @app.route("/receiver_analytics")
 def receiver_analytics():
@@ -830,5 +913,124 @@ def archive_page():
         "archive.html",
         donations=donations
     )"""
+
+@app.route("/volunteer_register", methods=["GET", "POST"])
+def volunteer_register():
+
+    if request.method == "POST":
+
+        volunteer = Volunteer(
+
+            name=request.form["name"],
+
+            phone=request.form["phone"],
+
+            email=request.form["email"],
+
+            password=request.form["password"],
+
+            address=request.form["address"],
+
+            vehicle=request.form["vehicle"],
+
+            max_distance=request.form["max_distance"]
+
+        )
+
+        db.session.add(volunteer)
+
+        db.session.commit()
+
+        return redirect("/volunteer_login")
+
+    return render_template(
+        "volunteer_register.html"
+    )
+
+@app.route("/volunteer_login", methods=["GET", "POST"])
+def volunteer_login():
+
+    if request.method == "POST":
+
+        email = request.form["email"]
+        password = request.form["password"]
+
+        volunteer = Volunteer.query.filter_by(
+            email=email,
+            password=password
+        ).first()
+
+        if volunteer:
+
+            session["volunteer_id"] = volunteer.volunteer_id
+            session["volunteer_name"] = volunteer.name
+
+            return redirect("/volunteer_dashboard")
+
+        return "Invalid Email or Password"
+
+    return render_template(
+        "volunteer_login.html"
+    )
+
+@app.route("/volunteer_dashboard")
+def volunteer_dashboard():
+
+    if "volunteer_id" not in session:
+
+        return redirect("/volunteer_login")
+
+    return render_template(
+        "volunteer_dashboard.html",
+        name=session["volunteer_name"]
+    )
+@app.route("/volunteer_profile")
+def volunteer_profile():
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    volunteer = Volunteer.query.get(
+        session["volunteer_id"]
+    )
+
+    return render_template(
+        "volunteer_profile.html",
+        volunteer=volunteer
+    )
+
+@app.route("/volunteer_history")
+def volunteer_history():
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    return render_template(
+        "volunteer_history.html"
+    )
+
+@app.route("/assigned_pickups")
+def assigned_pickups():
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    donations = Donation.query.filter_by(
+        volunteer_id=session["volunteer_id"]
+    ).all()
+
+    return render_template(
+        "assigned_pickups.html",
+        donations=donations
+    )
+
+@app.route("/volunteer_logout")
+def volunteer_logout():
+
+    session.pop("volunteer_id", None)
+    session.pop("volunteer_name", None)
+
+    return redirect("/volunteer_login")
+
 if __name__ == "__main__":
     app.run(debug=True)

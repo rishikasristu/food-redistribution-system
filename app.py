@@ -824,10 +824,26 @@ def accepted_donations():
         status="Accepted"
     ).all()
 
+    volunteers = Volunteer.query.filter_by(
+        availability="Available"
+    ).all()
+
     return render_template(
         "accepted_donations.html",
-        donations=donations
+        donations=donations,
+        volunteers=volunteers
     )
+
+@app.route("/assign_volunteer/<int:id>", methods=["POST"])
+def assign_volunteer(id):
+
+    donation = Donation.query.get_or_404(id)
+
+    donation.volunteer_id = request.form["volunteer_id"]
+
+    db.session.commit()
+
+    return redirect("/accepted_donations")
 
 @app.route("/receiver_analytics")
 def receiver_analytics():
@@ -999,8 +1015,13 @@ def assigned_pickups():
     if "volunteer_id" not in session:
         return redirect("/volunteer_login")
 
+    donations = Donation.query.filter_by(
+        volunteer_id=session["volunteer_id"]
+    ).all()
+
     return render_template(
-        "assigned_pickups.html"
+        "assigned_pickups.html",
+        donations=donations
     )
 
 @app.route("/volunteer_logout")
