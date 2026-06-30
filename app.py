@@ -863,23 +863,21 @@ def accepted_donations():
 @app.route("/assign_volunteer/<int:id>", methods=["POST"])
 def assign_volunteer(id):
 
-    if "receiver_id" not in session:
-        return redirect("/receiver_login")
+    print("SESSION =", dict(session))
 
     donation = Donation.query.get_or_404(id)
 
     volunteer_id = int(request.form["volunteer_id"])
 
     donation.volunteer_id = volunteer_id
-
     donation.volunteer_response = "Pending"
-
     donation.pickup_status = "Assigned"
 
     db.session.commit()
 
-    return redirect("/accepted_donations")
+    print("Volunteer assigned successfully")
 
+    return redirect("/accepted_donations")
 @app.route("/receiver_analytics")
 def receiver_analytics():
 
@@ -1059,23 +1057,21 @@ def assigned_pickups():
         "assigned_pickups.html",
         donations=donations
     )
-@app.route("/assign_volunteer/<int:id>", methods=["POST"])
-def assign_volunteer(id):
+@app.route("/accept_assignment/<int:id>")
+def accept_assignment(id):
 
-    if "receiver_id" not in session:
-        return redirect("/receiver_login")
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
 
     donation = Donation.query.get_or_404(id)
 
-    volunteer_id = int(request.form["volunteer_id"])
+    donation.volunteer_response = "Accepted"
 
-    donation.volunteer_id = volunteer_id
-    donation.volunteer_response = "Pending"
-    donation.pickup_status = "Assigned"
+    donation.pickup_status = "Volunteer Accepted"
 
     db.session.commit()
 
-    return redirect("/accepted_donations")
+    return redirect("/assigned_pickups")
 
 @app.route("/decline_assignment/<int:id>")
 def decline_assignment(id):
