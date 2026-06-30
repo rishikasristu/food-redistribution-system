@@ -37,6 +37,7 @@ Assigned Pickups
 <th>Address</th>
 <th>Phone</th>
 <th>Status</th>
+<th>Volunteer Action</th>
 
 </tr>
 
@@ -57,6 +58,35 @@ Assigned Pickups
 <td>{{ donation.donor_phone }}</td>
 
 <td>{{ donation.status }}</td>
+<td>
+
+{% if donation.volunteer_response == "Pending" %}
+
+<a href="/accept_assignment/{{ donation.donation_id }}"
+    class="btn btn-success btn-sm">
+
+Accept
+
+</a>
+
+<a href="/decline_assignment/{{ donation.donation_id }}"
+    class="btn btn-danger btn-sm">
+
+    Decline
+
+</a>
+
+{% else %}
+
+<span class="badge bg-info">
+
+{{ donation.volunteer_response }}
+
+</span>
+
+{% endif %}
+
+</td>
 
 </tr>
 

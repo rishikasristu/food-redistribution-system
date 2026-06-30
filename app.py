@@ -157,6 +157,26 @@ class Donation(db.Model):
     user_id = db.Column(db.Integer)
     status = db.Column(db.String(20))
 
+    volunteer_id = db.Column(
+        db.Integer,
+        nullable=True
+    )
+
+    volunteer_response = db.Column(
+        db.String(20),
+        default="Pending"
+    )
+
+    pickup_status = db.Column(
+        db.String(30),
+        default="Waiting"
+    )
+
+    estimated_pickup_time = db.Column(
+        db.DateTime,
+        nullable=True
+    )
+
     
 # Home Page
 """@app.route("/")
@@ -180,6 +200,12 @@ def receiver_home():
 
     return render_template(
         "receiver_home.html"
+    )
+@app.route("/volunteer_home")
+def volunteer_home():
+
+    return render_template(
+        "volunteer_home.html"
     )
 @app.route("/donate")
 def donate():
@@ -834,12 +860,31 @@ def accepted_donations():
         volunteers=volunteers
     )
 
-@app.route("/assign_volunteer/<int:id>", methods=["POST"])
+"""@app.route("/assign_volunteer/<int:id>", methods=["POST"])
 def assign_volunteer(id):
 
     donation = Donation.query.get_or_404(id)
 
     donation.volunteer_id = request.form["volunteer_id"]
+
+    db.session.commit()
+
+    return redirect("/accepted_donations")"""
+@app.route("/assign_volunteer/<int:id>", methods=["POST"])
+def assign_volunteer(id):
+
+    if "receiver_id" not in session:
+        return redirect("/receiver_login")
+
+    donation = Donation.query.get_or_404(id)
+
+    volunteer_id = int(request.form["volunteer_id"])
+
+    donation.volunteer_id = volunteer_id
+
+    donation.volunteer_response = "Pending"
+
+    donation.pickup_status = "Assigned"
 
     db.session.commit()
 
@@ -1023,6 +1068,39 @@ def assigned_pickups():
         "assigned_pickups.html",
         donations=donations
     )
+@app.route("/accept_assignment/<int:id>")
+def accept_assignment(id):
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    donation = Donation.query.get_or_404(id)
+
+    donation.volunteer_response = "Accepted"
+
+    donation.pickup_status = "Volunteer Accepted"
+
+    db.session.commit()
+
+    return redirect("/assigned_pickups")
+
+@app.route("/decline_assignment/<int:id>")
+def decline_assignment(id):
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    donation = Donation.query.get_or_404(id)
+
+    donation.volunteer_id = None
+
+    donation.volunteer_response = "Declined"
+
+    donation.pickup_status = "Waiting for Volunteer"
+
+    db.session.commit()
+
+    return redirect("/assigned_pickups")
 
 @app.route("/volunteer_logout")
 def volunteer_logout():
