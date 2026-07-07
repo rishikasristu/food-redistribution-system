@@ -176,7 +176,13 @@ class Donation(db.Model):
         db.DateTime,
         nullable=True
     )
+class Admin(db.Model):
+    __tablename__ = "admins"
 
+    admin_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    username = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
     
 # Home Page
 """@app.route("/")
@@ -1136,6 +1142,112 @@ def volunteer_logout():
     session.pop("volunteer_name", None)
 
     return redirect("/volunteer_login")
+@app.route("/admin_login", methods=["GET","POST"])
+def admin_login():
 
+    if request.method=="POST":
+
+        username=request.form["username"]
+        password=request.form["password"]
+
+        admin=Admin.query.filter_by(
+            username=username,
+            password=password
+        ).first()
+
+        if admin:
+
+            session["admin_id"]=admin.admin_id
+            session["admin_name"]=admin.name
+
+            return redirect("/admin_dashboard")
+
+        else:
+
+            flash("Invalid Login")
+
+    return render_template("admin_login.html")
+@app.route("/admin_dashboard")
+def admin_dashboard():
+
+    if "admin_id" not in session:
+        return redirect("/admin_login")
+
+    total_donors = User.query.count()
+
+    total_receivers = Receiver.query.count()
+
+    total_volunteers = Volunteer.query.count()
+
+    total_donations = Donation.query.count()
+
+    pending = Donation.query.filter_by(status="Pending").count()
+
+    accepted = Donation.query.filter_by(status="Accepted").count()
+
+    expired = Donation.query.filter_by(status="Expired").count()
+
+    delivered = Donation.query.filter_by(
+        pickup_status="Delivered"
+    ).count()
+
+    return render_template(
+        "admin_dashboard.html",
+
+        total_donors=total_donors,
+        total_receivers=total_receivers,
+        total_volunteers=total_volunteers,
+        total_donations=total_donations,
+
+        pending=pending,
+        accepted=accepted,
+        expired=expired,
+        delivered=delivered
+    )
+@app.route("/admin_donors")
+def admin_donors():
+
+    if "admin_id" not in session:
+        return redirect("/admin_login")
+
+    donors = User.query.all()
+
+    return render_template(
+        "admin_donors.html",
+        donors=donors
+    )
+@app.route("/admin_receivers")
+def admin_receivers():
+
+    receivers=Receiver.query.all()
+
+    return render_template(
+        "admin_receivers.html",
+        receivers=receivers
+    )
+@app.route("/admin_volunteers")
+def admin_volunteers():
+
+    volunteers=Volunteer.query.all()
+
+    return render_template(
+        "admin_volunteers.html",
+        volunteers=volunteers
+    )
+@app.route("/admin_donations")
+def admin_donations():
+
+    donations=Donation.query.all()
+
+    return render_template(
+        "admin_donations.html",
+        donations=donations
+    )
+@app.route("/admin_logout")
+def admin_logout():
+
+    session.clear()
+
+    return redirect("/admin_login")
 if __name__ == "__main__":
     app.run(debug=True)
