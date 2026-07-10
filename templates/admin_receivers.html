@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Manage Receivers</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+    <h2 class="text-center mb-4">
+
+        Manage Receivers
+
+    </h2>
+
+    <div class="text-end mb-3">
+
+        <a href="/admin_dashboard" class="btn btn-secondary">
+
+            Back to Dashboard
+
+        </a>
+
+    </div>
+
+    <table class="table table-bordered table-hover table-striped shadow">
+
+        <thead class="table-dark">
+
+        <tr>
+
+            <th>ID</th>
+
+            <th>Organization</th>
+
+            <th>Phone</th>
+
+            <th>Email</th>
+
+            <th>Address</th>
+
+            <th>Action</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for receiver in receivers %}
+
+        <tr>
+
+            <td>{{ receiver.id }}</td>
+
+            <td>{{ receiver.organization_name }}</td>
+
+            <td>{{ receiver.phone }}</td>
+
+            <td>{{ receiver.email }}</td>
+
+            <td>{{ receiver.address }}</td>
+
+            <td>
+
+                <a href="/delete_receiver/{{ receiver.id }}"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Delete this receiver?')">
+
+                    Delete
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</body>
+
+</html>

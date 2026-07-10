@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Admin Dashboard</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+<h2 class="text-center mb-4">
+
+Welcome {{session["admin_name"]}}
+
+</h2>
+
+<div class="row">
+
+<div class="col-md-3">
+<div class="card bg-primary text-white mb-3">
+<div class="card-body text-center">
+<h5>Total Donors</h5>
+<h2>{{total_donors}}</h2>
+</div>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card bg-success text-white mb-3">
+<div class="card-body text-center">
+<h5>Total Receivers</h5>
+<h2>{{total_receivers}}</h2>
+</div>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card bg-warning text-dark mb-3">
+<div class="card-body text-center">
+<h5>Total Volunteers</h5>
+<h2>{{total_volunteers}}</h2>
+</div>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card bg-danger text-white mb-3">
+<div class="card-body text-center">
+<h5>Total Donations</h5>
+<h2>{{total_donations}}</h2>
+</div>
+</div>
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<div class="card">
+
+<div class="card-body text-center">
+
+<h6>Pending</h6>
+
+<h3>{{pending}}</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card">
+
+<div class="card-body text-center">
+
+<h6>Accepted</h6>
+
+<h3>{{accepted}}</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card">
+
+<div class="card-body text-center">
+
+<h6>Delivered</h6>
+
+<h3>{{delivered}}</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card">
+
+<div class="card-body text-center">
+
+<h6>Expired</h6>
+
+<h3>{{expired}}</h3>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="text-center">
+
+<a href="/admin_donors" class="btn btn-primary m-2">
+
+Manage Donors
+
+</a>
+
+<a href="/admin_receivers" class="btn btn-success m-2">
+
+Manage Receivers
+
+</a>
+
+<a href="/admin_volunteers" class="btn btn-warning m-2">
+
+Manage Volunteers
+
+</a>
+
+<a href="/admin_donations" class="btn btn-danger m-2">
+
+Manage Donations
+
+</a>
+
+<a href="/admin_logout" class="btn btn-dark m-2">
+
+Logout
+
+</a>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

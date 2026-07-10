@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Manage Donors</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+    <h2 class="text-center mb-4">
+
+        Manage Donors
+
+    </h2>
+
+    <div class="text-end mb-3">
+
+        <a href="/admin_dashboard" class="btn btn-secondary">
+
+            Back to Dashboard
+
+        </a>
+
+    </div>
+
+    <table class="table table-bordered table-hover table-striped shadow">
+
+        <thead class="table-dark">
+
+        <tr>
+
+            <th>ID</th>
+
+            <th>Name</th>
+
+            <th>Phone</th>
+
+            <th>Email</th>
+
+            <th>User ID</th>
+
+            <th>Action</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for donor in donors %}
+
+        <tr>
+
+            <td>{{ donor.id }}</td>
+
+            <td>{{ donor.name }}</td>
+
+            <td>{{ donor.phone }}</td>
+
+            <td>{{ donor.email }}</td>
+
+            <td>{{ donor.userid }}</td>
+
+            <td>
+
+                <a href="/delete_donor/{{ donor.id }}"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Delete this donor?')">
+
+                    Delete
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</body>
+
+</html>
