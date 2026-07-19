@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = "foodredistribution"
 
 # MySQL Connection
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:TUcaEoZHqldRNfhyoUGhcsfVVsskfNbd@yamabiko.proxy.rlwy.net:39246/railway'
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:@localhost:3306/foodredistribution"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
