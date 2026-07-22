@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, session, flash
+from sqlalchemy import text
+from flask import Flask, render_template, request, redirect, session, flash,url_for
 from sqlalchemy.exc import IntegrityError
 from flask_sqlalchemy import SQLAlchemy
 from geopy.distance import geodesic
@@ -924,6 +925,40 @@ def collect(id):
     db.session.commit()
 
     return redirect("/accepted_donations")
+
+@app.route('/reject_donation_reason/<int:donation_id>', methods=['POST'])
+def reject_donation_reason(donation_id):
+
+    if 'receiver_id' not in session:
+        flash("Please login as receiver.", "danger")
+        return redirect(url_for('receiver_login'))
+
+    reason = request.form.get('reason')
+
+    if not reason:
+        flash("Please enter a reason.", "warning")
+        return redirect(url_for('receiver'))
+
+    receiver_id = session['receiver_id']
+
+    query = text("""
+        INSERT INTO receiver_rejections
+        (donation_id, receiver_id, rejection_reason)
+        VALUES
+        (:donation_id, :receiver_id, :reason)
+    """)
+
+    db.session.execute(query, {
+        "donation_id": donation_id,
+        "receiver_id": receiver_id,
+        "reason": reason
+    })
+
+    db.session.commit()
+
+    flash("Reason submitted successfully.", "success")
+
+    return redirect(url_for('receiver'))
 
 @app.route("/receiver_logout")
 def receiver_logout():
