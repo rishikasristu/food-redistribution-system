@@ -1011,35 +1011,6 @@ def collect(id):
     db.session.commit()
 
     return redirect("/accepted_donations")
-
-@app.route('/reject_donation_reason/<int:donation_id>', methods=['POST'])
-def reject_donation_reason(donation_id):
-
-    if 'receiver_id' not in session:
-        flash("Please login first")
-        return redirect(url_for('receiver_login'))
-
-    reason = request.form['reason']
-
-    receiver_id = session['receiver_id']
-
-    db.session.execute(text("""
-        INSERT INTO receiver_rejections
-        (donation_id, receiver_id, rejection_reason)
-        VALUES
-        (:d,:r,:reason)
-    """),
-    {
-        "d": donation_id,
-        "r": receiver_id,
-        "reason": reason
-    })
-
-    db.session.commit()
-
-    flash("Reason submitted successfully")
-
-    return redirect(url_for('receiver'))
 @app.route("/receiver_logout")
 def receiver_logout():
 
