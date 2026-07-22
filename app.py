@@ -156,6 +156,10 @@ class Donation(db.Model):
     )
 
     user_id = db.Column(db.Integer)
+    receiver_id = db.Column(
+        db.Integer,
+        nullable=True
+    )
     status = db.Column(db.String(20))
 
     volunteer_id = db.Column(
@@ -435,6 +439,9 @@ def submit():
 @app.route("/receiver")
 def receiver():
 
+    if "receiver_id" not in session:
+        return redirect("/receiver_login")
+
     expired_donations = Donation.query.filter(
         Donation.status == "Pending"
     ).all()
@@ -467,11 +474,56 @@ def receiver():
         ""
     )
 
+    receiver_id = session["receiver_id"]
+
+
+
+    search = request.args.get("search", "")
+
+# Donations already rejected by this receiver
+    rejected_ids = db.session.execute(
+        text("""
+            SELECT donation_id
+            FROM receiver_rejections
+            WHERE receiver_id = :rid
+            """),
+            {"rid": receiver_id}
+    ).fetchall()
+
+    rejected_ids = [row[0] for row in rejected_ids]
+
     donations = Donation.query.filter(
-        
-        Donation.food_name.ilike(
-            f"%{search}%"
+
+        Donation.food_name.ilike(f"%{search}%"),
+
+        ~Donation.donation_id.in_(rejected_ids),
+
+        (
+            (Donation.status == "Pending")
+
+            |
+
+            (
+                (Donation.status == "Accepted") &
+                (Donation.receiver_id == receiver_id)
+            )
+
+            |
+
+            (
+                (Donation.status == "Collected") &
+                (Donation.receiver_id == receiver_id)
+            )
+
+            |
+
+            (
+                (Donation.status == "Delivered") &
+                (Donation.receiver_id == receiver_id)
+            )
+
         )
+
     ).order_by(
         Donation.priority_score.desc()
     ).all()
@@ -491,21 +543,55 @@ def receiver():
 @app.route("/accept/<int:id>")
 def accept(id):
 
-    donation = Donation.query.get(id)
+    if "receiver_id" not in session:
+        return redirect("/receiver_login")
+
+    donation = Donation.query.get_or_404(id)
+
+    # Prevent another NGO from accepting it
+    if donation.receiver_id is not None:
+        flash("This donation has already been accepted by another receiver.", "warning")
+        return redirect("/receiver")
 
     donation.status = "Accepted"
+    donation.receiver_id = session["receiver_id"]
 
     db.session.commit()
+
+    flash("Donation accepted successfully.", "success")
 
     return redirect("/receiver")
-@app.route("/reject/<int:id>")
-def reject(id):
+@app.route('/reject_donation_reason/<int:donation_id>', methods=['POST'])
+def reject_donation_reason(donation_id):
 
-    donation = Donation.query.get(id)
+    if "receiver_id" not in session:
+        return redirect("/receiver_login")
 
-    donation.status = "Rejected"
+    donation = Donation.query.get_or_404(donation_id)
+
+    reason = request.form["reason"]
+
+    # Save rejection history
+    db.session.execute(text("""
+        INSERT INTO receiver_rejections
+        (donation_id, receiver_id, rejection_reason)
+        VALUES (:d, :r, :reason)
+    """),
+    {
+        "d": donation_id,
+        "r": session["receiver_id"],
+        "reason": reason
+    })
+
+    # Keep donation available for other receivers
+    donation.status = "Pending"
+
+    # Remove current receiver assignment if any
+    donation.receiver_id = None
 
     db.session.commit()
+
+    flash("Rejection recorded successfully.", "success")
 
     return redirect("/receiver")
 """@app.route("/delete/<int:id>")

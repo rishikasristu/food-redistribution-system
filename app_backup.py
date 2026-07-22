@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, session
+from sqlalchemy import text
+from flask import Flask, render_template, request, redirect, session, flash,url_for
 from sqlalchemy.exc import IntegrityError
 from flask_sqlalchemy import SQLAlchemy
 from geopy.distance import geodesic
@@ -10,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = "foodredistribution"
 
 # MySQL Connection
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:TUcaEoZHqldRNfhyoUGhcsfVVsskfNbd@yamabiko.proxy.rlwy.net:39246/railway'
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:rishika%4008@localhost:3306/foodredistribution"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -157,6 +158,32 @@ class Donation(db.Model):
     user_id = db.Column(db.Integer)
     status = db.Column(db.String(20))
 
+    volunteer_id = db.Column(
+        db.Integer,
+        nullable=True
+    )
+
+    volunteer_response = db.Column(
+        db.String(20),
+        default="Pending"
+    )
+
+    pickup_status = db.Column(
+        db.String(30),
+        default="Waiting"
+    )
+
+    estimated_pickup_time = db.Column(
+        db.DateTime,
+        nullable=True
+    )
+class Admin(db.Model):
+    __tablename__ = "admins"
+
+    admin_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    username = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
     
 # Home Page
 """@app.route("/")
@@ -180,6 +207,12 @@ def receiver_home():
 
     return render_template(
         "receiver_home.html"
+    )
+@app.route("/volunteer_home")
+def volunteer_home():
+
+    return render_template(
+        "volunteer_home.html"
     )
 @app.route("/donate")
 def donate():
@@ -837,14 +870,21 @@ def accepted_donations():
 @app.route("/assign_volunteer/<int:id>", methods=["POST"])
 def assign_volunteer(id):
 
+    print("SESSION =", dict(session))
+
     donation = Donation.query.get_or_404(id)
 
-    donation.volunteer_id = request.form["volunteer_id"]
+    volunteer_id = int(request.form["volunteer_id"])
+
+    donation.volunteer_id = volunteer_id
+    donation.volunteer_response = "Pending"
+    donation.pickup_status = "Assigned"
 
     db.session.commit()
 
-    return redirect("/accepted_donations")
+    print("Volunteer assigned successfully")
 
+    return redirect("/accepted_donations")
 @app.route("/receiver_analytics")
 def receiver_analytics():
 
@@ -886,6 +926,34 @@ def collect(id):
 
     return redirect("/accepted_donations")
 
+@app.route('/reject_donation_reason/<int:donation_id>', methods=['POST'])
+def reject_donation_reason(donation_id):
+
+    if 'receiver_id' not in session:
+        flash("Please login first")
+        return redirect(url_for('receiver_login'))
+
+    reason = request.form['reason']
+
+    receiver_id = session['receiver_id']
+
+    db.session.execute(text("""
+        INSERT INTO receiver_rejections
+        (donation_id, receiver_id, rejection_reason)
+        VALUES
+        (:d,:r,:reason)
+    """),
+    {
+        "d": donation_id,
+        "r": receiver_id,
+        "reason": reason
+    })
+
+    db.session.commit()
+
+    flash("Reason submitted successfully")
+
+    return redirect(url_for('receiver'))
 @app.route("/receiver_logout")
 def receiver_logout():
 
@@ -933,7 +1001,8 @@ def volunteer_register():
 
             vehicle=request.form["vehicle"],
 
-            max_distance=request.form["max_distance"]
+            max_distance=request.form["max_distance"],
+            availability="Available"
 
         )
 
@@ -977,12 +1046,25 @@ def volunteer_login():
 def volunteer_dashboard():
 
     if "volunteer_id" not in session:
-
         return redirect("/volunteer_login")
+
+    volunteer = Volunteer.query.get(session["volunteer_id"])
+
+    assigned = Donation.query.filter(
+        Donation.volunteer_id == session["volunteer_id"],
+        Donation.status != "Delivered"
+    ).count()
+
+    completed = Donation.query.filter(
+        Donation.volunteer_id == session["volunteer_id"],
+        Donation.status == "Delivered"
+    ).count()
 
     return render_template(
         "volunteer_dashboard.html",
-        name=session["volunteer_name"]
+        volunteer=volunteer,
+        assigned=assigned,
+        completed=completed
     )
 @app.route("/volunteer_profile")
 def volunteer_profile():
@@ -1023,6 +1105,64 @@ def assigned_pickups():
         "assigned_pickups.html",
         donations=donations
     )
+@app.route("/accept_assignment/<int:id>")
+def accept_assignment(id):
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    donation = Donation.query.get_or_404(id)
+
+    donation.volunteer_response = "Accepted"
+
+    donation.pickup_status = "Volunteer Accepted"
+
+    db.session.commit()
+
+    return redirect("/assigned_pickups")
+
+@app.route("/decline_assignment/<int:id>")
+def decline_assignment(id):
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    donation = Donation.query.get_or_404(id)
+
+    donation.volunteer_id = None
+
+    donation.volunteer_response = "Declined"
+
+    donation.pickup_status = "Waiting for Volunteer"
+
+    db.session.commit()
+
+    return redirect("/assigned_pickups")
+
+@app.route("/update_pickup_status/<int:id>/<status>")
+def update_pickup_status(id, status):
+
+    if "volunteer_id" not in session:
+        return redirect("/volunteer_login")
+
+    donation = Donation.query.get_or_404(id)
+
+    allowed_status = [
+        "Travelling",
+        "Reached",
+        "Collected",
+        "Delivered"
+    ]
+
+    if status in allowed_status:
+        donation.pickup_status = status
+
+        if status == "Delivered":
+            donation.status = "Delivered"
+
+        db.session.commit()
+
+    return redirect("/assigned_pickups")
 
 @app.route("/volunteer_logout")
 def volunteer_logout():
@@ -1031,6 +1171,112 @@ def volunteer_logout():
     session.pop("volunteer_name", None)
 
     return redirect("/volunteer_login")
+@app.route("/admin_login", methods=["GET","POST"])
+def admin_login():
 
+    if request.method=="POST":
+
+        username=request.form["username"]
+        password=request.form["password"]
+
+        admin=Admin.query.filter_by(
+            username=username,
+            password=password
+        ).first()
+
+        if admin:
+
+            session["admin_id"]=admin.admin_id
+            session["admin_name"]=admin.name
+
+            return redirect("/admin_dashboard")
+
+        else:
+
+            flash("Invalid Login")
+
+    return render_template("admin_login.html")
+@app.route("/admin_dashboard")
+def admin_dashboard():
+
+    if "admin_id" not in session:
+        return redirect("/admin_login")
+
+    total_donors = User.query.count()
+
+    total_receivers = Receiver.query.count()
+
+    total_volunteers = Volunteer.query.count()
+
+    total_donations = Donation.query.count()
+
+    pending = Donation.query.filter_by(status="Pending").count()
+
+    accepted = Donation.query.filter_by(status="Accepted").count()
+
+    expired = Donation.query.filter_by(status="Expired").count()
+
+    delivered = Donation.query.filter_by(
+        pickup_status="Delivered"
+    ).count()
+
+    return render_template(
+        "admin_dashboard.html",
+
+        total_donors=total_donors,
+        total_receivers=total_receivers,
+        total_volunteers=total_volunteers,
+        total_donations=total_donations,
+
+        pending=pending,
+        accepted=accepted,
+        expired=expired,
+        delivered=delivered
+    )
+@app.route("/admin_donors")
+def admin_donors():
+
+    if "admin_id" not in session:
+        return redirect("/admin_login")
+
+    donors = User.query.all()
+
+    return render_template(
+        "admin_donors.html",
+        donors=donors
+    )
+@app.route("/admin_receivers")
+def admin_receivers():
+
+    receivers=Receiver.query.all()
+
+    return render_template(
+        "admin_receivers.html",
+        receivers=receivers
+    )
+@app.route("/admin_volunteers")
+def admin_volunteers():
+
+    volunteers=Volunteer.query.all()
+
+    return render_template(
+        "admin_volunteers.html",
+        volunteers=volunteers
+    )
+@app.route("/admin_donations")
+def admin_donations():
+
+    donations=Donation.query.all()
+
+    return render_template(
+        "admin_donations.html",
+        donations=donations
+    )
+@app.route("/admin_logout")
+def admin_logout():
+
+    session.clear()
+
+    return redirect("/admin_login")
 if __name__ == "__main__":
     app.run(debug=True)
