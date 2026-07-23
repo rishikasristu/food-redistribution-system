@@ -444,16 +444,83 @@ def receiver():
     receiver_id = session["receiver_id"]
     
 
-    expired_donations = Donation.query.filter(
-        Donation.status == "Pending"
+    expired = Donation.query.filter(
+    Donation.status == "Pending"
     ).all()
 
-    for donation in expired_donations:
+    for donation in expired:
 
         if datetime.now() > donation.expiry_time:
-            donation.status = "Expired"
 
-    db.session.commit()
+            db.session.execute(text("""
+
+                INSERT INTO expired_donations(
+
+                    donation_id,
+                    food_name,
+                    food_type,
+                    quantity,
+                    prep_time,
+                    expiry_time,
+                    scheduled_time,
+                    description,
+                    donor_phone,
+                    donor_address,
+                    donor_latitude,
+                    donor_longitude,
+                    image_path,
+                    priority_score,
+                    user_id,
+                    receiver_id
+
+                )
+
+                VALUES(
+
+                    :donation_id,
+                    :food_name,
+                    :food_type,
+                    :quantity,
+                    :prep_time,
+                    :expiry_time,
+                    :scheduled_time,
+                    :description,
+                    :donor_phone,
+                    :donor_address,
+                    :donor_latitude,
+                    :donor_longitude,
+                    :image_path,
+                    :priority_score,
+                    :user_id,
+                    :receiver_id
+
+                )
+
+                """), {
+
+                "donation_id": donation.donation_id,
+                "food_name": donation.food_name,
+                "food_type": donation.food_type,
+                "quantity": donation.quantity,
+                "prep_time": donation.prep_time,
+                "expiry_time": donation.expiry_time,
+                "scheduled_time": donation.scheduled_time,
+                "description": donation.description,
+                "donor_phone": donation.donor_phone,
+                "donor_address": donation.donor_address,
+                "donor_latitude": donation.donor_latitude,
+                "donor_longitude": donation.donor_longitude,
+                "image_path": donation.image_path,
+                "priority_score": donation.priority_score,
+                "user_id": donation.user_id,
+                "receiver_id": donation.receiver_id
+
+                })
+
+            db.session.delete(donation)
+
+        db.session.commit()
+
 
     # Dashboard Counts
 
