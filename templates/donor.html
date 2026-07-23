@@ -370,10 +370,7 @@ navigator.geolocation.getCurrentPosition(async function(position){
         {
 
             document.getElementById("address").value =
-            (addr.suburb || "") + ", " +
-            (addr.city || addr.town || addr.village || "") + ", " +
-            (addr.state || "");
-
+                data.display_name;
         }
 
     }
