@@ -224,16 +224,15 @@ def donate():
     if "user_id" not in session:
         return redirect("/login")
 
-    user = User.query.get(
-        session["user_id"]
-    )
+    user = User.query.get(session["user_id"])
 
     return render_template(
         "donor.html",
         user=user,
-        today=datetime.now().strftime("%Y-%m-%dT%H:%M")
+        today=datetime.now().strftime("%Y-%m-%d"),
+        today_datetime=datetime.now().strftime("%Y-%m-%dT%H:%M")
     )
-# Submit Donation
+#Submit donation
 @app.route("/submit", methods=["POST"])
 def submit():
 
