@@ -441,6 +441,9 @@ def receiver():
     if "receiver_id" not in session:
         return redirect("/receiver_login")
 
+    receiver_id = session["receiver_id"]
+    
+
     expired_donations = Donation.query.filter(
         Donation.status == "Pending"
     ).all()
@@ -461,7 +464,8 @@ def receiver():
     ).count()
 
     accepted = Donation.query.filter_by(
-        status="Accepted"
+        status="Accepted",
+        receiver_id=receiver_id
     ).count()
 
     expired = Donation.query.filter_by(
@@ -473,8 +477,7 @@ def receiver():
         ""
     )
 
-    receiver_id = session["receiver_id"]
-
+    
 
 
     search = request.args.get("search", "")
@@ -530,15 +533,39 @@ def receiver():
         status="Collected"
     ).count()
 
-    return render_template(
+    rejection_history = {}
+
+    rows = db.session.execute(text("""
+    SELECT
+        rr.donation_id,
+        rr.rejection_reason,
+        r.organization_name
+    FROM receiver_rejections rr
+    JOIN receivers r
+    ON rr.receiver_id = r.id
+    ORDER BY rr.rejected_at DESC
+    """)).fetchall()
+
+    for row in rows:
+
+        if row.donation_id not in rejection_history:
+            rejection_history[row.donation_id] = []
+
+        rejection_history[row.donation_id].append({
+            "receiver": row.organization_name,
+            "reason": row.rejection_reason
+        })
+        return render_template(
         "receiver.html",
         donations=donations,
+        rejection_history=rejection_history,
         total=total,
         pending=pending,
         accepted=accepted,
         expired=expired,
-        collected = collected
+        collected=collected
     )
+    
 @app.route("/accept/<int:id>")
 def accept(id):
 
@@ -547,8 +574,6 @@ def accept(id):
 
     donation = Donation.query.get_or_404(id)
 
-    print("SESSION =", dict(session))
-    print("Receiver ID =", session.get("receiver_id"))
 
     if donation.receiver_id is not None:
         flash("This donation has already been accepted by another receiver.", "warning")
@@ -681,9 +706,11 @@ def login():
         return redirect("/dashboard")
 
     return "Invalid Login"
-
 @app.route("/history")
 def history():
+
+    if "user_id" not in session:
+        return redirect("/login")
 
     donations = Donation.query.filter_by(
         user_id=session["user_id"]
@@ -693,6 +720,8 @@ def history():
         "history.html",
         donations=donations
     )
+
+
 @app.route("/dashboard")
 def dashboard():
 

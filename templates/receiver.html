@@ -241,6 +241,46 @@
 
         </tr>
 
+        {% if rejection_history.get(donation.donation_id) %}
+
+        <tr>
+
+            <td colspan="14">
+
+                <div class="alert alert-warning mb-0">
+
+                    <b>Previous Rejections</b>
+
+                    <ul class="mb-0 mt-2">
+
+                        {% for item in rejection_history[donation.donation_id] %}
+
+                        <li>
+
+                            <b>{{ item.receiver }}</b> rejected because
+
+                            <span class="text-danger">
+
+                                {{ item.reason }}
+
+                            </span>
+
+                        </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    {% endif %}
+
+
+
         {% endfor %}
         
 
@@ -310,6 +350,7 @@
         </div>
 
     </div>
+    
 
     {% endfor %}
 
