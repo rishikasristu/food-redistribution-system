@@ -780,7 +780,7 @@ def logout():
 
     session.clear()
 
-    return redirect("/login")
+    return redirect("/index")
 
 @app.route(
     "/receiver_register",
