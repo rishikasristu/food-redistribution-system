@@ -364,15 +364,8 @@ navigator.geolocation.getCurrentPosition(async function(position){
 
         let addr = data.address;
 
-        if(
-            document.getElementById("address").value == ""
-        )
-        {
-
-            document.getElementById("address").value =
-                data.display_name;
-        }
-
+        document.getElementById("address").value =
+            data.display_name || "Address not available";
     }
     catch(error){
 
