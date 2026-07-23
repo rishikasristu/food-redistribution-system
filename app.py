@@ -548,7 +548,9 @@ def accept(id):
 
     donation = Donation.query.get_or_404(id)
 
-    # Prevent another NGO from accepting it
+    print("SESSION =", dict(session))
+    print("Receiver ID =", session.get("receiver_id"))
+
     if donation.receiver_id is not None:
         flash("This donation has already been accepted by another receiver.", "warning")
         return redirect("/receiver")
