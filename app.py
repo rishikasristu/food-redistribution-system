@@ -635,6 +635,7 @@ def register():
         user = User(
             name=request.form["name"],
             phone=request.form["phone"],
+            address=request.form["address"], 
             email=request.form["email"],
             userid=request.form["userid"],
             password=request.form["password"]
