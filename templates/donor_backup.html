@@ -10,7 +10,7 @@
       rel="stylesheet">
 ```
 <link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 </head>
 
@@ -249,13 +249,8 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
             </button>
 
-            <div id="map"
-                style="
-                height:400px;
-                width:100%;
-                border-radius:10px;
-                border:1px solid #ccc;">
-            </div>
+            <iframe
+                
 
         </div>
         <button type="button"
@@ -375,35 +370,8 @@ navigator.geolocation.getCurrentPosition(async function(position){
 
     }
 
-
-});
-
-let map;
-let marker;
-
-navigator.geolocation.getCurrentPosition(async function(position){
-
-    let lat = position.coords.latitude;
-    let lon = position.coords.longitude;
-
-    document.getElementById("latitude").value = lat;
-    document.getElementById("longitude").value = lon;
-
-    map = L.map('map').setView([lat, lon], 16);
-
-    L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-            attribution:'© OpenStreetMap'
-        }
-    ).addTo(map);
-
-    marker = L.marker(
-        [lat,lon],
-        {
-            draggable:true
-        }
-    ).addTo(map);
+    document.getElementById("mapFrame").src =
+        `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
 
 });
 
@@ -642,8 +610,6 @@ function validateExpiry(){
     return true;
 }
 </script>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 </body>
 </html>
