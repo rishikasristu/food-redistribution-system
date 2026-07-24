@@ -254,6 +254,8 @@ def submit():
     description = request.form["description"]
 
     phone = request.form["phone"]
+    if not phone.isdigit() or len(phone) != 10:
+        return "Phone number must contain exactly 10 digits."
 
     address = request.form["address"]
 
@@ -727,6 +729,7 @@ def register():
         user = User(
             name=request.form["name"],
             phone=request.form["phone"],
+            
             address=request.form["address"], 
             email=request.form["email"],
             userid=request.form["userid"],
