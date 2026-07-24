@@ -405,6 +405,41 @@ navigator.geolocation.getCurrentPosition(async function(position){
         }
     ).addTo(map);
 
+    marker.on("dragend", async function(e){
+
+        let position = marker.getLatLng();
+
+        document.getElementById("latitude").value =
+            position.lat;
+
+        document.getElementById("longitude").value =
+            position.lng;
+
+    });
+
+    try{
+
+        let response = await fetch(
+
+    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.lat}&lon=${position.lng}`
+
+    );
+
+        let data = await response.json();
+
+        document.getElementById("address").value =
+
+        data.display_name || "";
+
+    }
+    catch{
+
+        document.getElementById("address").value =
+
+            "Address not found";
+
+    }
+
 });
 
 function showPreview(){
