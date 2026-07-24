@@ -226,7 +226,7 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
                 name="address"
                 class="form-control"
                 value="{{ user.address }}"
-                oninput="searchAddress()"
+                
                 onchange="updateMapFromAddress()">
 
             <div
@@ -347,36 +347,9 @@ function startTeluguVoice(){
 
 // GPS + Address + Map Preview
 
-navigator.geolocation.getCurrentPosition(async function(position){
-
-    let lat = position.coords.latitude;
-    let lon = position.coords.longitude;
-
-    document.getElementById("latitude").value = lat;
-    document.getElementById("longitude").value = lon;
-
-    try {
-
-        let response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-        );
-
-        let data = await response.json();
-
-        let addr = data.address;
-
-        document.getElementById("address").value =
-            data.display_name || "Address not available";
-    }
-    catch(error){
-
-        document.getElementById("address").value =
-            "Address not available";
-
-    }
-
-
-});
+// -----------------------------
+// Leaflet Map + GPS + Address
+// -----------------------------
 
 let map;
 let marker;
@@ -389,58 +362,85 @@ navigator.geolocation.getCurrentPosition(async function(position){
     document.getElementById("latitude").value = lat;
     document.getElementById("longitude").value = lon;
 
-    map = L.map('map').setView([lat, lon], 16);
+    map = L.map("map").setView([lat, lon], 16);
 
     L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
-            attribution:'© OpenStreetMap'
+            attribution: "© OpenStreetMap"
         }
     ).addTo(map);
 
     marker = L.marker(
-        [lat,lon],
+        [lat, lon],
         {
-            draggable:true
+            draggable: true
         }
     ).addTo(map);
 
-    marker.on("dragend", async function(e){
-
-        let position = marker.getLatLng();
-
-        document.getElementById("latitude").value =
-            position.lat;
-
-        document.getElementById("longitude").value =
-            position.lng;
-
-    });
+    // Current address
 
     try{
 
         let response = await fetch(
 
-    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.lat}&lon=${position.lng}`
+`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
 
-    );
+        );
 
         let data = await response.json();
 
         document.getElementById("address").value =
-
-        data.display_name || "";
+            data.display_name || "";
 
     }
+
     catch{
 
         document.getElementById("address").value =
-
-            "Address not found";
+            "Address not available";
 
     }
 
-});
+    // Dragging marker
+
+    marker.on("dragend", async function(){
+
+        let p = marker.getLatLng();
+
+        document.getElementById("latitude").value =
+            p.lat;
+
+        document.getElementById("longitude").value =
+            p.lng;
+
+        try{
+
+            let response = await fetch(
+
+`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.lat}&lon=${p.lng}`
+
+            );
+
+            let data = await response.json();
+
+            document.getElementById("address").value =
+                data.display_name || "";
+
+        }
+
+        catch{
+
+            document.getElementById("address").value =
+                "Address not found";
+
+        }
+
+    });
+    document.getElementById("suggestions").innerHTML = "";
+
+})
+
 
 function showPreview(){
 
@@ -473,33 +473,45 @@ async function updateMapFromAddress(){
     let address =
         document.getElementById("address").value;
 
+    if(address=="")
+        return;
+
     try{
 
         let response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+
+`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+
         );
 
         let data = await response.json();
 
-        if(data.length > 0){
+        if(data.length>0){
 
-            let lat = data[0].lat;
-            let lon = data[0].lon;
+            let lat = parseFloat(data[0].lat);
 
-            document.getElementById("latitude").value = lat;
-            document.getElementById("longitude").value = lon;
+            let lon = parseFloat(data[0].lon);
 
-            document.getElementById("mapFrame").src =
-                `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+            document.getElementById("latitude").value =
+                lat;
+
+            document.getElementById("longitude").value =
+                lon;
+
+            marker.setLatLng([lat,lon]);
+
+            map.setView([lat,lon],16);
+
         }
 
-    }catch(error){
+    }
+
+    catch(error){
 
         console.log(error);
 
-        alert(error);
-
     }
+
 }
 function openGoogleMaps(){
 
@@ -677,6 +689,17 @@ function validateExpiry(){
     return true;
 }
 </script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const addressBox = document.getElementById("address");
+
+    addressBox.addEventListener("keyup", function () {
+
+        searchAddress();
+
+    });
+
+});
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
