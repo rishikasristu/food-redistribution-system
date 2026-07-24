@@ -622,16 +622,16 @@ def receiver():
             "receiver": row.organization_name,
             "reason": row.rejection_reason
         })
-        return render_template(
-        "receiver.html",
-        donations=donations,
-        rejection_history=rejection_history,
-        total=total,
-        pending=pending,
-        accepted=accepted,
-        expired=expired,
-        collected=collected
-    )
+    return render_template(
+    "receiver.html",
+    donations=donations,
+    rejection_history=rejection_history,
+    total=total,
+    pending=pending,
+    accepted=accepted,
+    expired=expired,
+    collected=collected
+)
     
 @app.route("/accept/<int:id>")
 def accept(id):
