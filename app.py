@@ -966,14 +966,22 @@ def receiver_dashboard():
         status="Pending"
     ).count()
 
+    receiver_id = session["receiver_id"]
+
     accepted = Donation.query.filter_by(
+        receiver_id=receiver_id,
         status="Accepted"
     ).count()
 
     collected = Donation.query.filter_by(
+        receiver_id=receiver_id,
         status="Collected"
     ).count()
 
+    delivered = Donation.query.filter_by(
+        receiver_id=receiver_id,
+        status="Delivered"
+    ).count()
     expired = Donation.query.filter_by(
         status="Expired"
     ).count()
